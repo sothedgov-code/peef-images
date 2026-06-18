@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PEEF Recommended Applications 2012-2025</title>
+
+<style>
+:root{
+  --bg:#e9edf3;
+  --light:#ffffff;
+  --dark:#cfd6e2;
+  --primary:#4a5bdc;
+  --text:#2f3445;
+}
+
+body{
+  font-family:"Segoe UI", Tahoma, sans-serif;
+  font-size:13px;
+  background:var(--bg);
+  margin:0;
+  padding:25px;
+  color:var(--text);
+}
+
+h2{
+  text-align:center;
+  margin-bottom:18px;
+  color:var(--primary);
+  letter-spacing:.4px;
+}
+
+input{
+  width:50%;
+  padding:12px 14px;
+  margin:0 auto 20px;
+  display:block;
+  border:none;
+  border-radius:14px;
+  background:var(--bg);
+  outline:none;
+  box-shadow:
+    inset 4px 4px 8px var(--dark),
+    inset -4px -4px 8px var(--light);
+}
+
+/* TABLE WRAPPER FOR MOBILE SCROLL */
+.table-wrapper{
+  width:100%;
+  overflow-x:auto;
+}
+
+table{
+  width:100%;
+  min-width:900px;
+  border-collapse:separate;
+  border-spacing:0;
+  display:none;
+  background:var(--bg);
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:
+    8px 8px 18px var(--dark),
+    -8px -8px 18px var(--light);
+}
+
+th, td{
+  padding:9px 6px;
+  text-align:center;
+}
+
+th{
+  font-weight:600;
+  color:var(--primary);
+}
+
+tbody tr:hover td{
+  background:#eef1f8;
+}
+
+#suggestions{
+  position:absolute;
+  width:50%;
+  left:25%;
+  background:var(--bg);
+  border-radius:14px;
+  display:none;
+  z-index:9999;
+  box-shadow:
+    8px 8px 18px var(--dark),
+    -8px -8px 18px var(--light);
+}
+
+#suggestions div{
+  padding:9px 12px;
+  cursor:pointer;
+}
+
+#suggestions div:hover{
+  background:#eef1f8;
+}
+  #suggestions div.active{
+  background:#dfe5f7;
+}
+
+/* LOGIN */
+#loginBox{
+  max-width:380px;
+  margin:120px auto;
+  padding:30px;
+  border-radius:18px;
+  background:var(--bg);
+  box-shadow:
+    8px 8px 18px var(--dark),
+    -8px -8px 18px var(--light);
+}
+
+#loginBox button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:14px;
+  background:var(--primary);
+  color:#fff;
+  font-size:14px;
+  cursor:pointer;
+}
+
+button{
+  padding:10px 18px;
+  margin:5px;
+  border:none;
+  border-radius:10px;
+  background:#4a5bdc;
+  color:white;
+  cursor:pointer;
+}
+
+button:hover{
+  opacity:.9;
+}
+
+#error{
+  color:#c0392b;
+  text-align:center;
+  margin-top:10px;
+  display:none;
+}
+
+#mainContent{
+  display:none;
+}
+
+/* MOBILE RESPONSIVE */
+@media (max-width:768px){
+
+  body{
+    padding:15px;
+  }
+
+  input{
+    width:90%;
+  }
+
+  #suggestions{
+    width:90%;
+    left:5%;
+  }
+
+  h2{
+    font-size:16px;
+  }
+
+  table{
+    font-size:12px;
+  }
+
+  #loginBox{
+    margin:80px auto;
+    width:90%;
+  }
+}
+
+</style>
+</head>
+
+<body oncontextmenu="return false">
+
+<!-- LOGIN -->
+<div id="loginBox">
+  <h2>Hello Irfan</h2>
+  <input type="text" id="username" placeholder="Username">
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+  <div id="error">Invalid login credentials</div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="mainContent">
+
+<h2>PEEF Recommended Students List for 2012–2025</h2>
+
+<input type="text" id="searchInput" placeholder="Search by Name, Father Name or Mobile Number...">
+
+<div id="suggestions"></div>
+
+<div style="text-align:center;margin-bottom:15px;">
+    <button onclick="addToPrintList()" id="addBtn" style="display:none;">
+        Add To Print List
+    </button>
+
+    <button onclick="openPrintPage()">
+        Print Selected Students
+    </button>
+
+    <button onclick="clearPrintList()">
+        Clear List
+    </button>
+
+    <div id="selectedCount" style="margin-top:10px;font-weight:bold;">
+        Selected Students: 0
+    </div>
+</div>
+
+<div class="table-wrapper">
+<table id="dataTable">
+<thead>
+<tr>
+<th>S.No.</th>
+<th>Name</th>
+<th>Gender</th>
+<th>Father Name</th>
+<th>Address</th>
+<th>Region</th>
+<th>Year</th>
+<th>Student Contact</th>
+<th>Father Contact</th>
+<th>Institute Name</th>
+<th>Institution Contact</th>
+<th>Photo</th>
+</tr>
+</thead>
+
+<tbody id="tableBody"></tbody>
+</table>
+</div>
+
+</div>
+
+<script>
+
+/* SIMPLE FRONT-END LOGIN */
+const VALID_USER = "irfanshah";
+const VALID_PASS = "irfanshah";
+
+if (sessionStorage.getItem("loggedIn") === "true") {
+    showApp();
+}
+
+function login() {
+
+    const u = document.getElementById("username").value.trim();
+    const p = document.getElementById("password").value.trim();
+
+    if (u === VALID_USER && p === VALID_PASS) {
+
+        sessionStorage.setItem("loggedIn", "true");
+        showApp();
+
+    } else {
+
+        document.getElementById("error").style.display = "block";
+
+    }
+}
+
+function showApp() {
+
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("mainContent").style.display = "block";
+
+}
+
+/* DATA */
+
+let data = [];
+let currentStudent = null;
+
+let currentMatches = [];
+let selectedIndex = -1;
+
+let selectedStudents =
+JSON.parse(localStorage.getItem("selectedStudents")) || [];
+
+const searchInput = document.getElementById('searchInput');
+const suggestions = document.getElementById('suggestions');
+const table = document.getElementById('dataTable');
+const tableBody = document.getElementById('tableBody');
+
+/* COUNTER */
+
+function updateCounter() {
+
+    document.getElementById("selectedCount").innerText =
+        "Selected Students: " + selectedStudents.length;
+
+}
+
+/* LOAD CSV */
+
+fetch('data.csv')
+.then(response => response.text())
+.then(text => {
+
+    text = text.replace(/^\uFEFF/, '');
+
+    const lines = text.trim().split(/\r?\n/);
+
+    for (let i = 1; i < lines.length; i++) {
+
+        if (!lines[i].trim()) continue;
+
+        const cols = (lines[i].match(/(".*?"|[^",]*)(?=\s*,|\s*$)/g) || [])
+    .map(v => v.replace(/^"|"$/g,'').trim());
+
+        if (cols.length < 12) continue;
+
+        data.push({
+
+            serial: cols[0] || '',
+            name: cols[1] || '',
+            gender: cols[2] || '',
+            fatherName: cols[3] || '',
+            address: cols[4] || '',
+            region: cols[5] || '',
+            year: cols[6] || '',
+            studentContact: cols[7] || '',
+            fatherContact: cols[8] || '',
+            instituteName: cols[9] || '',
+            institutionContact: cols[10] || '',
+            photo: cols[11] || ''
+
+        });
+
+    }
+
+    console.log("Records Loaded:", data.length);
+
+});
+/* SEARCH */
+
+/* SEARCH */
+
+searchInput.addEventListener('input', function () {
+
+    const query = this.value.toLowerCase().trim();
+
+    searchInput.style.background = "";
+    suggestions.innerHTML = '';
+    selectedIndex = -1;
+
+    if (!query) {
+
+        suggestions.style.display = 'none';
+        table.style.display = 'none';
+        return;
+
+    }
+
+    currentMatches = data.filter(item =>
+
+        (item.name || '').toLowerCase().includes(query) ||
+        (item.fatherName || '').toLowerCase().includes(query) ||
+        (item.studentContact || '').toLowerCase().includes(query) ||
+        (item.fatherContact || '').toLowerCase().includes(query) ||
+        (item.institutionContact || '').toLowerCase().includes(query) ||
+        (item.address || '').toLowerCase().includes(query) ||
+        (item.instituteName || '').toLowerCase().includes(query) ||
+        (item.region || '').toLowerCase().includes(query) ||
+        (item.year || '').toLowerCase().includes(query)
+
+    ).slice(0,20);
+
+    if (!currentMatches.length) {
+
+        suggestions.style.display = 'none';
+        table.style.display = 'none';
+        return;
+
+    }
+
+    currentMatches.forEach((item,index) => {
+
+        const div = document.createElement('div');
+
+        div.textContent =
+        `${item.name} (Father: ${item.fatherName}) - ${item.studentContact}`;
+
+        div.onclick = () => showRecord(item);
+
+        div.addEventListener('mouseenter', () => {
+            removeActive();
+            selectedIndex = index;
+            div.classList.add('active');
+        });
+
+        suggestions.appendChild(div);
+
+    });
+
+    suggestions.style.display = 'block';
+
+    selectedIndex = 0;
+    updateActive(suggestions.querySelectorAll('div'));
+
+});
+  searchInput.addEventListener('keydown', function(e){
+
+    if (suggestions.style.display === 'none') return;
+
+const items = suggestions.querySelectorAll('div');
+
+if (!items.length) return;
+
+    if (e.key === 'ArrowDown') {
+
+        e.preventDefault();
+
+        selectedIndex = (selectedIndex + 1) % items.length;
+
+        updateActive(items);
+    }
+
+    else if (e.key === 'ArrowUp') {
+
+        e.preventDefault();
+
+        selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+
+        updateActive(items);
+    }
+
+    else if (e.key === 'Enter') {
+
+        e.preventDefault();
+
+        if (selectedIndex >= 0) {
+
+            showRecord(currentMatches[selectedIndex]);
+
+        }
+    }
+
+});
+
+function updateActive(items){
+
+    removeActive();
+
+    if (selectedIndex >= 0 && items[selectedIndex]) {
+
+        items[selectedIndex].classList.add('active');
+
+    }
+}
+
+function removeActive(){
+
+    const items = suggestions.querySelectorAll('div');
+
+    items.forEach(item =>
+        item.classList.remove('active')
+    );
+
+}
+/* SHOW STUDENT */
+
+function showRecord(item) {
+
+    currentStudent = item;
+
+    suggestions.style.display = 'none';
+
+    searchInput.value = item.name;
+    searchInput.style.background = "#dff0d8";
+
+    tableBody.innerHTML = `
+    <tr>
+        <td>${item.serial}</td>
+        <td>${item.name}</td>
+        <td>${item.gender}</td>
+        <td>${item.fatherName}</td>
+        <td>${item.address}</td>
+        <td>${item.region}</td>
+        <td>${item.year}</td>
+        <td>${item.studentContact}</td>
+        <td>${item.fatherContact}</td>
+        <td>${item.instituteName}</td>
+        <td>${item.institutionContact}</td>
+<td>
+         <img src="images/${item.photo}"
+         width="120"
+         height="120"
+         style="object-fit:cover;border-radius:8px;"
+         onerror="this.src='images/no-photo.jpg'">
+</td>
+    </tr>
+    `;
+
+    table.style.display = 'table';
+
+    document.getElementById("addBtn").style.display =
+        "inline-block";
+
+}
+
+/* ADD STUDENT TO PRINT LIST */
+
+function addToPrintList() {
+
+    if (!currentStudent) {
+
+        alert("Please select a student first.");
+        return;
+
+    }
+
+    const exists = selectedStudents.some(
+
+        s => s.serial === currentStudent.serial
+
+    );
+
+    if (exists) {
+
+        alert("Student already added.");
+        return;
+
+    }
+
+    selectedStudents.push(currentStudent);
+
+    localStorage.setItem(
+
+        "selectedStudents",
+        JSON.stringify(selectedStudents)
+
+    );
+
+    updateCounter();
+
+    alert("Student added successfully.");
+searchInput.value = "";
+searchInput.style.background = "";
+currentStudent = null;
+document.getElementById("addBtn").style.display = "none";
+}
+
+/* OPEN PRINT PAGE */
+
+function openPrintPage() {
+
+    if (selectedStudents.length === 0) {
+        alert("No students selected.");
+        return;
+    }
+
+    let html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <title>Selected Students</title>
+
+    <style>
+
+    body{
+        font-family:Arial,sans-serif;
+        padding:20px;
+    }
+
+    h2{
+        text-align:center;
+    }
+
+    table{
+        width:100%;
+        border-collapse:collapse;
+        margin-top:15px;
+    }
+
+    th,td{
+        border:1px solid #000;
+        padding:6px;
+        text-align:center;
+        font-size:12px;
+    }
+
+    button{
+        padding:10px 20px;
+        margin-bottom:15px;
+        cursor:pointer;
+    }
+
+    @media print{
+        button{
+            display:none;
+        }
+
+        body{
+            margin:0;
+        }
+    }
+
+    </style>
+
+    </head>
+    <body>
+
+    <h2>Selected Students</h2>
+
+    <button onclick="window.print()">
+        Print
+    </button>
+
+    <table>
+
+    <thead>
+    <tr>
+        <th>S.No.</th>
+        <th>Name</th>
+        <th>Gender</th>
+        <th>Father Name</th>
+        <th>Address</th>
+        <th>Region</th>
+        <th>Year</th>
+        <th>Student Contact</th>
+        <th>Father Contact</th>
+        <th>Institute Name</th>
+        <th>Institution Contact</th>
+        <th>Photo</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    `;
+
+    selectedStudents.forEach(student => {
+
+        html += `
+        <tr>
+            <td>${student.serial}</td>
+            <td>${student.name}</td>
+            <td>${student.gender}</td>
+            <td>${student.fatherName}</td>
+            <td>${student.address}</td>
+            <td>${student.region}</td>
+            <td>${student.year}</td>
+            <td>${student.studentContact}</td>
+            <td>${student.fatherContact}</td>
+            <td>${student.instituteName}</td>
+            <td>${student.institutionContact}</td>
+<td>
+            <img src="images/${student.photo}"
+            width="70"
+            height="70"
+            style="object-fit:cover;"
+            onerror="this.src='images/no-photo.jpg'">
+</td>
+        </tr>
+        `;
+
+    });
+
+    html += `
+    </tbody>
+    </table>
+
+    </body>
+    </html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+
+    printWindow.document.write(html);
+
+    printWindow.document.close();
+}
+
+/* CLEAR LIST */
+
+function clearPrintList() {
+
+    if (!confirm("Clear all selected students?"))
+        return;
+
+    selectedStudents = [];
+
+    localStorage.removeItem("selectedStudents");
+
+    updateCounter();
+
+    alert("List cleared.");
+
+}
+
+/* INITIALIZE */
+
+updateCounter();
+document.addEventListener("click", function(e){
+
+    if(
+        e.target !== searchInput &&
+        !suggestions.contains(e.target)
+    ){
+        suggestions.style.display = "none";
+    }
+
+});
+
+</script>
+
+</body>
+</html>
