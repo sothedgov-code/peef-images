@@ -341,7 +341,6 @@ fetch('data.csv')
             photo: cols[11] || ''
 
         });
-      console.log("Photo:", cols[11]);
 
     }
 
@@ -499,11 +498,12 @@ function showRecord(item) {
         <td>${item.instituteName}</td>
         <td>${item.institutionContact}</td>
 <td>
-         <img src="images/${item.photo}"
-         width="120"
-         height="120"
-         style="object-fit:cover;border-radius:8px;"
-         onerror="this.src='images/no-photo.jpg'">
+        <img src="images/${item.photo}"
+     width="120"
+     height="120"
+     style="object-fit:cover;border-radius:8px;"
+     onload="console.log('Loaded:', this.src)"
+     onerror="console.log('Missing:', this.src); this.src='images/no-photo.jpg';">
 </td>
     </tr>
     `;
@@ -662,10 +662,10 @@ function openPrintPage() {
             <td>${student.institutionContact}</td>
 <td>
             <img src="images/${student.photo}"
-            width="70"
-            height="70"
-            style="object-fit:cover;"
-            onerror="this.src='images/no-photo.jpg'">
+     width="70"
+     height="70"
+     style="object-fit:cover;"
+     onerror="this.src='images/no-photo.jpg'">
 </td>
         </tr>
         `;
