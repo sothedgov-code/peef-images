@@ -320,9 +320,9 @@ fetch('data.csv')
 
         if (!lines[i].trim()) continue;
 
-        const cols = (lines[i].match(/(".*?"|[^",]*)(?=\s*,|\s*$)/g) || [])
+        const cols = lines[i].match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
     .map(v => v.replace(/^"|"$/g,'').trim());
-
+        console.log(cols);
         if (cols.length < 12) continue;
 
         data.push({
