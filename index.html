@@ -213,6 +213,10 @@ button:hover{
         Print Selected Students
     </button>
 
+    <button onclick="downloadVCF()">
+        Download VCF
+    </button>
+
     <button onclick="clearPrintList()">
         Clear List
     </button>
@@ -221,7 +225,6 @@ button:hover{
         Selected Students: 0
     </div>
 </div>
-
 <div class="table-wrapper">
 <table id="dataTable">
 <thead>
@@ -685,6 +688,69 @@ function openPrintPage() {
     printWindow.document.write(html);
 
     printWindow.document.close();
+}
+/* DOWNLOAD VCF */
+
+function downloadVCF() {
+
+    if (selectedStudents.length === 0) {
+        alert("No students selected.");
+        return;
+    }
+
+    let vcfContent = "";
+    let contactCounter = 1;
+
+    selectedStudents.forEach(student => {
+
+        let phone = (student.studentContact || "").trim();
+
+        if (!phone) {
+            phone = (student.fatherContact || "").trim();
+        }
+
+        if (!phone) return;
+
+        phone = phone.replace(/\D/g, '');
+
+        if (phone.startsWith('0')) {
+        phone = '92' + phone.substring(1);
+}
+
+        const serial = String(contactCounter++).padStart(3, '0');
+
+        vcfContent += `BEGIN:VCARD
+VERSION:3.0
+FN:PEEF-${serial} - ${student.name}
+TEL;TYPE=CELL:${phone}
+END:VCARD
+
+`;
+    });
+
+    if (!vcfContent.trim()) {
+        alert("No contact numbers available.");
+        return;
+    }
+
+    const blob = new Blob(
+        [vcfContent],
+        { type: 'text/vcard;charset=utf-8' }
+    );
+
+    const link = document.createElement('a');
+
+    link.href = URL.createObjectURL(blob);
+
+    link.download = 'PEEF_Contacts.vcf';
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(link.href);
 }
 
 /* CLEAR LIST */
